@@ -89,8 +89,8 @@ func (s *Scanner) isAtEnd() bool {
 	return s.curr >= len(s.Source)
 }
 func (s *Scanner) advance() byte {
-	s.curr++                  //why does it need to do this?
-	return s.Source[s.curr-1] //TODO: https://go.dev/blog/strings read this
+	s.curr++                  
+	return s.Source[s.curr-1] 
 }
 
 func (s *Scanner) peek() any {
@@ -119,7 +119,7 @@ func (s *Scanner) addConditionalToken(isTrue bool, trueToken TokenType, falseTok
 	s.addToken(falseToken)
 }
 
-func (s *Scanner) addToken(tType TokenType) { //in the book, they used method overloading to have all the addTokens be the same, use variadic function instead?
+func (s *Scanner) addToken(tType TokenType) { 
 	s.addTokenWithLiteral(tType, nil)
 }
 func (s *Scanner) addTokenWithLiteral(tType TokenType, literal any) {
