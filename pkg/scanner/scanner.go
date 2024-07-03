@@ -88,14 +88,16 @@ func (s *Scanner) scanToken() {
 func (s *Scanner) isAtEnd() bool {
 	return s.curr >= len(s.Source)
 }
+
 func (s *Scanner) advance() byte {
-	s.curr++                  
-	return s.Source[s.curr-1] 
+	s.curr++
+	return s.Source[s.curr-1]
 }
 
 func (s *Scanner) peek() any {
 	if s.isAtEnd() {
 		return "golang\000" //https://stackoverflow.com/questions/38007361/how-to-create-a-null-terminated-string-in-go
+		//TODO
 	}
 	return s.Source[s.curr]
 }
@@ -119,9 +121,11 @@ func (s *Scanner) addConditionalToken(isTrue bool, trueToken TokenType, falseTok
 	s.addToken(falseToken)
 }
 
-func (s *Scanner) addToken(tType TokenType) { 
+// TODO: figure out how to group the addToken methods somehow?
+func (s *Scanner) addToken(tType TokenType) {
 	s.addTokenWithLiteral(tType, nil)
 }
+
 func (s *Scanner) addTokenWithLiteral(tType TokenType, literal any) {
 	text := s.Source[s.start:s.curr]
 	s.Tokens = append(s.Tokens, *newToken(tType, text, literal, s.line))
