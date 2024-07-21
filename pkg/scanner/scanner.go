@@ -1,21 +1,15 @@
 package scanner
 
-type indexer struct {
-	start int //first character of lexeme being currently scanned
-	curr  int //unconsumed char being currently considered
-	line  int //current line
-}
-
 type Scanner struct {
-	Source string //TODO: should these be public
+	Code   string //TODO: should these be public
 	Tokens []Token
 
 	indexer //embedded anonymously
 }
 
-func newScanner(source string, tokens []Token) *Scanner {
+func newScanner(code string, tokens []Token) *Scanner {
 	return &Scanner{
-		Source: source,
+		Code:   code,
 		Tokens: tokens,
 		indexer: indexer{
 			start: 0,
@@ -25,7 +19,7 @@ func newScanner(source string, tokens []Token) *Scanner {
 	}
 }
 
-func (s *Scanner) scanTokens() {
+func (s *Scanner) Scan() {
 	for !s.isAtEnd() {
 		s.start = s.curr
 		s.scanToken()
@@ -86,12 +80,12 @@ func (s *Scanner) scanToken() {
 }
 
 func (s *Scanner) isAtEnd() bool {
-	return s.curr >= len(s.Source)
+	return s.curr >= len(s.Code)
 }
 
 func (s *Scanner) advance() byte {
 	s.curr++
-	return s.Source[s.curr-1]
+	return s.Code[s.curr-1]
 }
 
 func (s *Scanner) peek() any {
@@ -99,14 +93,14 @@ func (s *Scanner) peek() any {
 		return "golang\000" //https://stackoverflow.com/questions/38007361/how-to-create-a-null-terminated-string-in-go
 		//TODO
 	}
-	return s.Source[s.curr]
+	return s.Code[s.curr]
 }
 
 func (s *Scanner) match(expected byte) bool {
 	if s.isAtEnd() {
 		return false
 	}
-	if s.Source[s.curr] != expected {
+	if s.Code[s.curr] != expected {
 		return false
 	}
 	s.curr++
@@ -127,6 +121,6 @@ func (s *Scanner) addToken(tType TokenType) {
 }
 
 func (s *Scanner) addTokenWithLiteral(tType TokenType, literal any) {
-	text := s.Source[s.start:s.curr]
+	text := s.Code[s.start:s.curr]
 	s.Tokens = append(s.Tokens, *newToken(tType, text, literal, s.line))
 }
