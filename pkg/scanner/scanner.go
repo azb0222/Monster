@@ -19,6 +19,8 @@ func newScanner(code string, tokens []Token) *Scanner {
 	}
 }
 
+// TODO: write better function descriptions
+// Scan() iterates through each letter, and creates tokens
 func (s *Scanner) Scan() {
 	for !s.isAtEnd() {
 		s.start = s.curr
@@ -27,6 +29,7 @@ func (s *Scanner) Scan() {
 	s.Tokens = append(s.Tokens, *newToken(EOF, "", nil, s.line))
 }
 
+// scanToken() takes in a character, and classifies into a Token based on the next character
 func (s *Scanner) scanToken() {
 	c := s.advance()
 
@@ -115,7 +118,6 @@ func (s *Scanner) addConditionalToken(isTrue bool, trueToken TokenType, falseTok
 	s.addToken(falseToken)
 }
 
-// TODO: figure out how to group the addToken methods somehow?
 func (s *Scanner) addToken(tType TokenType) {
 	s.addTokenWithLiteral(tType, nil)
 }

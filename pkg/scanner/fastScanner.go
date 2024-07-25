@@ -1,9 +1,10 @@
 package scanner
 
 import (
-	"runtime"
-	"time"
 	"monster/pkg/concurrencyUtils"
+	"runtime"
+	"strings"
+	"time"
 )
 
 // based off pattern in https://go.dev/doc/codewalk/sharemem/
@@ -18,10 +19,10 @@ var (
 
 // MOVE TYPES SOMEWHERE ELSE?
 type FastScanner struct {
-	Code   string
+	Code string
 	//does it make sense to have it as a private field?
 	codeBlocks map[string]string
-	Tokens []Token
+	Tokens     []Token
 }
 
 func NewFastScanner(code string, tokens []Token) *FastScanner {
@@ -58,6 +59,48 @@ func newCodeBlockState(codeBlock *codeBlock) *codeBlockState {
 	return &codeBlockState{
 		codeBlock: codeBlock,
 		isDone:    false,
+	}
+}
+
+
+func (fs *FastScanner) Scan() {
+		pending, complete := make(chan *codeBlock), make(chan *codeBlock)
+		stateMonitor := concurrencyUtils.StateMonitor(logInterval)
+
+		for i := 0; i < CPUNum; i++ {
+			go cbScanner(pending, complete, status)
+		}
+
+		go func() {
+			for _, cb := range codeBlocks {
+				pending <- &CodeBlock{
+					code: cb,
+					indexer: indexer{
+						start: 0,
+						curr:  0,
+					},
+				}
+			}
+		}()
+	}
+}
+
+// TODO: rewrite the comments so they are better
+// splitCode() splits the code into logical codeBlocks that can be processed by the scanner concurrently based on CPUNum
+func (fs *FastScanner) splitCode() {
+	lexemes := strings.Fields(fs.Code)
+
+	var codeBlocks []*codeBlock
+
+	for i := 0; i < len(lexemes); i += CPUNum {
+		end := i + CPUNum
+
+		if end > len(lexemes) {
+			end = len(lexemes)
+		}
+
+		code := strings.Join(lexemes[i:end], " ")
+		codeBlocks = append(codeBlocks, newCodeBlock(code))
 	}
 }
 
@@ -119,44 +162,3 @@ func newCodeBlockState(codeBlock *codeBlock) *codeBlockState {
 //		out <- cb
 //	}
 //}
-
-func (fs *FastScanner) Scan() {
-		pending, complete := make(chan *codeBlock), make(chan *codeBlock)
-		stateMonitor := concurrencyUtils.StateMonitor(logInterval)
-
-
-
-		//TODO: this runtime.NumCPU() should be in one variable
-		for i := 0; i < runtime.NumCPU(); i++ {
-			go cbScanner(pending, complete, status)
-		}
-
-		//TODO: replace with actual generation function
-		codeBlocks := []string{
-			"print 'hello'",
-			"var x = 10",
-			"test 23 = 12",
-		}
-
-
-		go func() {
-			for _, cb := range codeBlocks {
-				pending <- &CodeBlock{
-					code: cb,
-					indexer: indexer{
-						start: 0,
-						curr:  0,
-					},
-				}
-			}
-		}()
-	}
-}
-
-func (fs *FastScanner) splitCode() {
-
-	testCode := "asdf asdflkj lejl lkjwe wlkj xnm ljkl wljel lkjsd wlkejl dkljf"
-
-	for
-
-}

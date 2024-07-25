@@ -1,3 +1,0 @@
-# SCANNER
-
-- Inline equation: 

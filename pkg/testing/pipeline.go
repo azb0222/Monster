@@ -9,8 +9,6 @@ import (
 	"time"
 )
 
-//TODO: https://go.dev/blog/pipelines finish reading this
-
 func generator[T any, K any](done <-chan K, fn func() T) <-chan T {
 	stream := make(chan T)
 	//as long as this goroutine runs (until message sent on done channel), will continue to do stream<-fn() even after generator() is done
